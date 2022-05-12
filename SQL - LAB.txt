@@ -1,0 +1,680 @@
+
+--------------------------------------------------------------------------
+LAB 1 - SELECT Statement
+
+1. Write a query which displays all the unique COUNTRY_IDs from the LOCATIONS table
+
+The SELECT DISTINCT statement is used to return only distinct (different) values.
+
+SELECT DISTINCT COUNTRY_ID
+FROM hr.LOCATIONS
+
+
+
+2. Write a query which displays all the unique values of DEPARTMENT_ID and JOB_ID from the 
+hr.EMPLOYEES table.
+
+
+SELECT DISTINCT DEPARTMENT_ID, JOB_ID
+FROM hr.EMPLOYEES
+
+3. Write a query which displays all the job titles from the hr.JOBS table and the subtraction between 
+the maximum and minimum salary per job. Name the last column ‘SALARY_RANGE’
+
+
+4. Write a query which displays all the addresses from the LOCATIONS table as shown below:
+COUNTRY_ID, CITY POSTAL_CODE, STREET_ADDRESS
+The result should be named ‘ADDRESS’
+
+SELECT CONCAT(COUNTRY_ID,',',CITY,' ',POSTAL_CODE,',', STREET_ADDRESS) AS ADDRESS
+FROM hr.LOCATIONS
+
+
+--------------------------------------------------------------------------------
+
+LAB 2 - Filtering and Sorting
+
+1. Write a query which displays the first name, the last name, the gender and the city of all the 
+customers in the company (sh.CUSTOMERS) who have a credit limit greater than $10 000. The result 
+should contain only the unique records and the limit.
+
+SELECT DISTINCT(CUST_FIRST_NAME),CUST_LAST_NAME, CUST_GENDER, CUST_CREDIT_LIMIT
+FROM sh.CUSTOMERS
+WHERE CUST_CREDIT_LIMIT > 10000
+
+
+2. Write a query which displays the first name and the last name of the employees (hr.EMPLOYEES) 
+whose manager ID = 121.
+
+SELECT FIRST_NAME , LAST_NAME
+FROM hr.EMPLOYEES
+WHERE MANAGER_ID = 121
+
+
+3. Write a query which displays all the female customers whose marital status is ‘single’ 
+(oe.CUSTOMERS). Display only those whose credit limit is greater than 200 and smaller than 400.
+
+SELECT *
+FROM oe.CUSTOMERS
+WHERE MARITAL_STATUS = 'single'
+AND CREDIT_LIMIT BETWEEN 200 and 400
+
+4. Write a query which displays the first name, the last name and the salary of the employees 
+(hr.EMPLOYEES) that work as accountants (ST_CLERK, PU_CLERK) and whose first name begins 
+with ‘S’. Write the query in two different ways (with and without the IN clause).
+
+SELECT FIRST_NAME,LAST_NAME,SALARY
+FROM hr.EMPLOYEES
+WHERE JOB_ID IN ('ST_CLERK','PU_CLERK')
+AND FIRST_NAME LIKE('S%')
+
+
+5. Write a query which displays all the departments (hr.DEPARTMENTS) which do not have an 
+assigned manager and are not ‘Sales’ departments. Sort the result in ascending order
+
+SELECT DEPARTMENT_NAME, MANAGER_ID
+FROM hr.DEPARTMENTS
+WHERE  MANAGER_ID IS NOT NULL
+AND DEPARTMENT_NAME NOT IN ('Sales')
+ORDER BY MANAGER_ID 
+
+6. Write a query which displays all the unique income levels of the customers from (oe.CUSTOMERS). 
+Display only the levels that are in the format given below. The result should contain unique records 
+and should be sorted in descending order.
+
+Format:
+
+<any letter>: <letters>,<letters> - <letters>,<letters>
+
+
+SELECT DISTINCT(INCOME_LEVEL)
+FROM oe.CUSTOMERS
+WHERE INCOME_LEVEL LIKE ('_:%-%')
+ORDER BY INCOME_LEVEL DESC 
+
+7. Write a query which displays all the promotions (sh.PROMOTIONS) with cost (PROMO_COST) 
+between 2000 and 3000 or between 6000 and 7000. Sort the result of the category 
+(PROMO_CATEGORY) in ascending order and the cost in descending order. The result should 
+contain the name, category, begin date, end date and the cost of the promotion. Create the query in 
+two different ways.
+
+SELECT PROMO_NAME,PROMO_CATEGORY,PROMO_BEGIN_DATE,PROMO_END_DATE,PROMO_COST
+FROM sh.PROMOTIONS
+WHERE PROMO_COST BETWEEN 2000 and 3000 or PROMO_COST BETWEEN 6000 and 7000
+ORDER BY PROMO_CATEGORY ASC,PROMO_COST DESC
+
+8. Write a query which displays the first name, the last name, the hire date and the phone number of 
+the employees whose manager ID=100 and their salary is between $8000 and $11000. Sort the 
+commission in descending order and the first name in ascending order
+
+SELECT FIRST_NAME, LAST_NAME, HIRE_DATE, PHONE_NUMBER, MANAGER_ID, SALARY
+FROM hr.EMPLOYEES
+
+WHERE SALARY BETWEEN 8000 and 11000 AND MANAGER_ID = 100
+
+ORDER BY COMMISSION_PCT DESC,FIRST_NAME ASC
+
+-----------------------------------------------------------------------------------------------------
+
+LAB 3 – Scalar functions
+
+1. Write a query which displays the first name and the last name of each employee from the 
+EMPLOYEES table. The result column should be named ‘EMPLOYEE’. The query should also display 
+how many years the employee has worked in the company. The result column should be named 
+‘EXPERIENCE’
+
+SELECT CONCAT(FIRST_NAME, LAST_NAME) AS EMPLOYEES , DATEDIFF(YEAR,HIRE_DATE, GETDATE()) AS EXPERIENCE
+
+FROM hr.EMPLOYEES
+
+
+2. The Marketing Department needs a report to display the product name, product category, product 
+sub-category and the product list price increased by 7.5% for the products of category "Hardware". 
+Label the column "New Price" and round the results to the second decimal character. 
+Note: Use table sh.PRODUCTS. The new price must be in format with two meaningful digits after the 
+decimal point
+
+
+SELECT PROD_NAME, PROD_CATEGORY, PROD_SUBCATEGORY, PROD_LIST_PRICE
+
+FROM sh.PRODUCTS
+
+WHERE PROD_CATEGORY = 'Hardware'
+
+SELECT PROD_NAME, PROD_CATEGORY, PROD_SUBCATEGORY,FORMAT(ROUND((PROD_LIST_PRICE / 13.3333) + PROD_LIST_PRICE ,2,0),'####.00')
+	
+FROM sh.PRODUCTS
+
+
+WHERE PROD_CATEGORY = 'Hardware'
+
+
+3. Using the same table, write a query that displays the product name written in capital letters and 
+the length of the product name for all products starting with 'A' or 'B'. Give each column an 
+appropriate label. Sort the result by length showing the longest names first.
+
+SELECT UPPER(PROD_NAME) AS NAME, LEN(PROD_NAME) AS LENGTH
+
+FROM sh.PRODUCTS
+
+WHERE PROD_NAME LIKE ('B%') or PROD_NAME LIKE ('A%')
+
+ORDER BY LENGTH DESC
+
+
+4. Make a report to display the name, start date and duration in months of all promotions starting 
+between 01.01.2000 and 01.05.2000. Use the table sh.PROMOTIONS. 
+
+SELECT PROMO_NAME, PROMO_BEGIN_DATE, CONVERT(VARCHAR, PROMO_BEGIN_DATE,104) AS 'dd.mm.yyyy',DATEDIFF(MONTH, PROMO_BEGIN_DATE,PROMO_END_DATE) AS Duration
+
+FROM sh.PROMOTIONS
+
+WHERE PROMO_BEGIN_DATE BETWEEN  '2000.01.01'and '2000.05.01'
+
+
+
+5. Extract the unique user names (all signs before the @ symbol) from the email of each customer 
+from the sh.CUSTOMERS table. Fill up the so found user name up to 3 characters with the asterix (*) 
+sign wherever that is needed. The result should contain only users with name length less than 4 
+characters. Show the result ordered by the user_name and only in lower case letters. 
+
+
+SELECT DISTINCT(CUST_EMAIL),
+CASE 
+    WHEN LEN(LOWER(SUBSTRING(CUST_EMAIL, 1 ,CHARINDEX('@',CUST_EMAIL) - 1))) < 3 THEN LOWER(SUBSTRING(CUST_EMAIL, 1 ,CHARINDEX('@',CUST_EMAIL) - 1)) + REPLICATE('*',1)
+    ELSE LOWER(SUBSTRING(CUST_EMAIL, 1 ,CHARINDEX('@',CUST_EMAIL) - 1)) 
+	END AS user_name 
+FROM sh.CUSTOMERS
+
+WHERE LEN(LOWER(SUBSTRING(CUST_EMAIL, 1 ,CHARINDEX('@',CUST_EMAIL) - 1))) < 4
+ORDER BY user_name
+
+
+6. Find the distinct products (sh.PRODUCTS) that have an empty space character at the end of their 
+name. Extract the gender they are targeted at at by reading just the last word in the 
+PROD_SUBCATEGORY column. Name the column TARGET_GENDER. Additionally you have to show 
+the category of the products by using the PROD_SUBCATEGORY_DESC column for records that 
+start with ‘this is the famous:’. Retrieving the category will require removal of the text ‘this is the 
+famous: ’ and all the text after the dash (‘-’) sign. The correct result is shown bellow
+
+
+SELECT  DISTINCT(PROD_NAME), SUBSTRING(PROD_CATEGORY,1 ,4) AS TARGET_GENDER,SUBSTRING(PROD_SUBCATEGORY_DESC,LEN('this is the famous:') + 1, 10) AS Category
+  
+FROM sh.PRODUCTS
+
+WHERE PROD_NAME LIKE ('% ')
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+LAB 4 – Conversion and Conditional Expressions
+
+1. Create a report that produces the following for each employee. <employee last name> earns 
+$<salary> monthly but wants $< 3 times salary>. Label the column ‘Dream salaries’. Make sure the 
+format of the salary is: ###,###.00
+
+SELECT CONCAT(LAST_NAME + '  earns' + ' $', FORMAT(SALARY,'###,###.00') + ' montly but wants $',FORMAT(SALARY * 3,'###,###.00'))
+FROM hr.EMPLOYEES
+
+
+2. Display each employee’s last name, hire date, and salary review date which is after six months of 
+service. Label the column ‘REVIEW’. Format the dates to appear in a format similar to 01.01.2000 
+(dd.mm.yyyy).
+
+SELECT LAST_NAME, FORMAT(HIRE_DATE,'dd.MM.yyyy'), FORMAT(DATEADD(MONTH,6,HIRE_DATE),'dd.MM.yyyy') AS REVIEW
+FROM hr.EMPLOYEES
+
+3. Write a query that displays the product name and the list price for all the products from the 
+oe.PRODUCT_INFORMATION table. If a product does not have a price, display ‘No price’. Name the 
+second column ‘Product price’
+
+SELECT PRODUCT_NAME, ISNULL(CAST(LIST_PRICE AS varchar),'No price') AS 'Product price'
+FROM oe.PRODUCT_INFORMATION
+
+4. Write a query that displays the grade of all employees based on the value of the column JOB_ID, 
+using the following data:
+
+Job Grade
+AD_PRES A
+ST_MAN B
+IT_PROG C
+SA_REP D
+ST_CLERK E
+None of the above 
+
+
+
+SELECT DISTINCT(JOB_ID),
+CASE 
+    WHEN JOB_ID = 'AD_PRES' THEN 'A'
+    WHEN JOB_ID = 'ST_MAN' THEN 'B'
+	WHEN JOB_ID = 'IT_PROG' THEN 'C'
+	WHEN JOB_ID = 'SA_REP' THEN 'D'
+	WHEN JOB_ID = 'ST_CLERK' THEN 'E'
+	ELSE 'None of the above 0' 
+	END AS user_name 
+
+FROM hr.EMPLOYEES
+
+
+-----------------------------------------------------------------------------------
+
+LAB 5 – Aggregate Functions
+
+
+1. Find the highest, lowest, sum, and average salary of all employees. Label the columns Maximum, 
+Minimum, Sum, and Average, respectively. Round the results to the nearest whole number.
+
+SELECT ROUND(MAX(SALARY),2) AS Maximum, ROUND(MIN(SALARY),2) AS Minimum, ROUND(SUM(SALARY),2) AS Sum, ROUND(AVG(SALARY),2) AS Average
+
+FROM hr.EMPLOYEES
+
+2. Modify the query from Task 1 to display the minimum, maximum, sum, and average salary for each 
+job type (JOB_ID).
+
+SELECT JOB_ID, ROUND(MAX(SALARY),2) AS Maximum, ROUND(MIN(SALARY),2) AS Minimum, ROUND(SUM(SALARY),2) AS Sum, ROUND(AVG(SALARY),2) AS Average
+FROM hr.EMPLOYEES
+GROUP BY JOB_ID
+
+3. Write a query to display the number of people with the same job (JOB_ID)
+
+SELECT JOB_ID,COUNT(JOB_ID) AS NUMBER_PEOPLE 
+FROM hr.EMPLOYEES
+GROUP BY JOB_ID
+
+4. Determine the number of managers without listing them. Label the column Number of Managers.
+Hint: Use the MANAGER_ID column to determine the number of managers.
+
+SELECT COUNT(DISTINCT(MANAGER_ID))
+FROM hr.EMPLOYEES
+
+5. Find the difference between the highest and lowest salaries. Label the column ‘Difference’
+
+SELECT (MAX(SALARY) - MIN(SALARY)) AS Difference
+FROM hr.EMPLOYEES
+
+6. Create a report to display the manager number and the salary of the lowest-paid employee for that 
+manager. Exclude anyone whose manager is not known. Exclude any groups where the minimum 
+salary is $6,000 or less. Sort the output in descending order of salary
+
+SELECT MANAGER_ID, MIN(SALARY)
+FROM hr.EMPLOYEES
+WHERE MANAGER_ID IS NOT NULL 
+GROUP BY MANAGER_ID 
+HAVING MIN(SALARY) > 6000
+ORDER BY MIN(SALARY) DESC
+
+-----------------------------------------------------------------------------
+
+LAB 6 – Combining Data from Multiple Tables
+
+1. Use the hr.LOCATIONS and hr.COUNTRIES tables to show the LOCATION_ID, STREET_ADDRESS, 
+CITY, STATE or PROVINCE, and COUNTRY in the output. Use INNER JOIN on COUNTRY_ID to 
+produce the results.
+
+SELECT e.LOCATION_ID, e.STREET_ADDRESS, e.CITY, e.STATE_PROVINCE, d.COUNTRY_NAME
+FROM hr.LOCATIONS e
+INNER JOIN hr.COUNTRIES d
+ON e.COUNTRY_ID  = d.COUNTRY_ID
+
+2. Display the LAST_NAME, JOB, DEPARTMENT_ID and DEPARTMENT_NAME for all the employees 
+who work in Toronto.
+
+SELECT LAST_NAME, JOB_ID,DEPARTMENT_ID  
+FROM hr.EMPLOYEES  
+WHERE DEPARTMENT_ID = 
+(SELECT DEPARTMENT_ID  
+FROM hr.DEPARTMENTS 
+WHERE LOCATION_ID = 
+(SELECT LOCATION_ID 
+FROM hr.LOCATIONS  
+WHERE CITY ='Toronto'))
+
+
+SELECT e.LAST_NAME, e.JOB_ID, e.DEPARTMENT_ID, d.DEPARTMENT_NAME
+FROM hr.EMPLOYEES e
+INNER JOIN hr.DEPARTMENTS d
+ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+WHERE LOCATION_ID = 
+(SELECT LOCATION_ID 
+FROM hr.LOCATIONS  
+WHERE CITY ='Toronto')
+
+
+3. Create a report to display employees’ last names and employee numbers along with their 
+managers’ last names and manager number. Label the columns Employee, Emp#, Manager, Mgr#, 
+respectively.
+
+SELECT e.LAST_NAME AS Employee, e.EMPLOYEE_ID AS 'Emp#' , d.LAST_NAME AS Maneger, d.EMPLOYEE_ID AS 'Mgr#'
+FROM hr.EMPLOYEES e JOIN hr.EMPLOYEES d
+ON e.MANAGER_ID = d.EMPLOYEE_ID  
+
+
+4. Modify the previous task to display all the employees, including King, who has no manager. Order 
+the results by the employee number (EMPLOYEE_ID).
+
+SELECT e.LAST_NAME AS Employee, e.EMPLOYEE_ID AS 'Emp#' , d.LAST_NAME AS Maneger, d.EMPLOYEE_ID AS 'Mgr#'
+FROM hr.EMPLOYEES e 
+LEFT OUTER JOIN hr.EMPLOYEES d
+ON e.MANAGER_ID = d.EMPLOYEE_ID  
+
+5. Find the names and hire dates for all employees who were hired before their managers, along with 
+their managers’ names and hire dates
+
+
+SELECT e.LAST_NAME, e.HIRE_DATE, d.LAST_NAME, d.HIRE_DATE
+FROM hr.EMPLOYEES e JOIN hr.EMPLOYEES d
+ON e.MANAGER_ID = d.EMPLOYEE_ID
+WHERE e.HIRE_DATE < d.HIRE_DATE
+
+6. Produce a list of unique jobs for departments 10, 50, 20, in that order. Display JOB_ID and 
+DEPARTMENT_ID using the SET operators.
+
+SELECT JOB_ID, DEPARTMENT_ID
+FROM hr.EMPLOYEES
+WHERE DEPARTMENT_ID = 10
+UNION
+SELECT JOB_ID, DEPARTMENT_ID
+FROM hr.EMPLOYEES
+WHERE DEPARTMENT_ID = 50
+UNION
+SELECT JOB_ID, DEPARTMENT_ID
+FROM hr.EMPLOYEES
+WHERE DEPARTMENT_ID = 20
+
+7. Create a report that list the employee IDs and job IDs of those employees who currently have a job 
+title that is the same as their job title when they were initially hired by the company (that is, they 
+changed jobs but have now gone back to doing their original job.) Use the SET operators and the 
+tables hr.EMPLOYEES and hr.JOB_HISTORY
+
+SELECT EMPLOYEE_ID, JOB_ID
+FROM hr.EMPLOYEES
+INTERSECT
+SELECT EMPLOYEE_ID, JOB_ID
+FROM hr.JOB_HISTORY
+ORDER BY EMPLOYEE_ID DESC
+
+-----------------------------------------------------------------------------
+
+LAB 7 - Subqueries and Common Table Expressions
+
+1. Create a report that displays the employee number, last name, and salary of all employees who 
+earn more than the average salary. Sort the results in order of ascending salary.
+
+SELECT EMPLOYEE_ID,LAST_NAME , SALARY
+FROM hr.EMPLOYEES
+WHERE SALARY > (SELECT AVG(SALARY) FROM hr.EMPLOYEES)
+ORDER BY SALARY ASC
+
+
+2. Write a query that displays the employee number and last name of all employees who work in a 
+department with any employee whose last name contains “u”
+
+SELECT EMPLOYEE_ID, LAST_NAME
+FROM hr.EMPLOYEES
+WHERE DEPARTMENT_ID IN( SELECT DEPARTMENT_ID FROM hr.EMPLOYEES WHERE LAST_NAME LIKE('%u%'))
+
+3. HR department needs a report that displays the last name, department number, and job ID of all 
+employees whose department location is 1700.
+
+SELECT LAST_NAME, DEPARTMENT_ID,JOB_ID
+FROM hr.EMPLOYEES
+WHERE DEPARTMENT_ID IN( SELECT DEPARTMENT_ID FROM hr.DEPARTMENTS WHERE LOCATION_ID = 1700)
+
+
+4. Create a report for HR that displays the last name and salary of every employee who reports to 
+King.
+
+
+SELECT LAST_NAME, SALARY
+FROM hr.EMPLOYEES
+WHERE MANAGER_ID IN( SELECT EMPLOYEE_ID FROM hr.EMPLOYEES WHERE LAST_NAME = 'King')
+
+5. Create a report that displays a list of all employees whose salary is more than the salary of any 
+employee in department 60
+
+SELECT LAST_NAME
+FROM hr.EMPLOYEES
+WHERE EMPLOYEE_ID IN( SELECT EMPLOYEE_ID FROM hr.DEPARTMENTS WHERE SALARY > 60)
+
+------------------------------------------------------------------------------------
+
+LAB 8 – Data Manipulation Language (DML)
+
+1. Execute the following script to create the hr.MY_EMPLOYEE table. 
+USE XE;
+IF OBJECT_ID('[hr].[MY_EMPLOYEE]', 'U') IS NOT NULL DROP TABLE 
+[hr].[MY_EMPLOYEE];
+CREATE TABLE [hr].[MY_EMPLOYEE](
+[ID] [int] NOT NULL,
+[LAST_NAME] [varchar](25) NULL,
+[FIRST_NAME] [varchar](25) NULL,
+[USERID] [varchar](8) NULL,
+[SALARY] [numeric](9, 2) NULL
+) ON [PRIMARY];
+INSERT INTO hr.MY_EMPLOYEE VALUES (1, 'Patel', 'Ralph', 'rpatel', 895);
+INSERT INTO hr.MY_EMPLOYEE VALUES (2, 'Dancs', 'Betty', 'bdancs', 860);
+INSERT INTO hr.MY_EMPLOYEE VALUES (3, 'Biri', 'Ben', 'bbiri', 1100);
+INSERT INTO hr.MY_EMPLOYEE VALUES (4, 'Newman', 'Chad', 'cnewman', 750);
+INSERT INTO hr.MY_EMPLOYEE VALUES (5, 'Ropeburn', 'Audrey', 'aropebur', 1550);
+
+
+(1 row(s) affected)
+
+(1 row(s) affected)
+
+(1 row(s) affected)
+
+(1 row(s) affected)
+
+(1 row(s) affected)
+
+
+2. List all the contents of the hr.MY_EMPLOYEE table
+
+SELECT *
+FROM hr.MY_EMPLOYEE
+
+1	Patel	Ralph	rpatel	895.00
+2	Dancs	Betty	bdancs	860.00
+3	Biri	Ben	bbiri	1100.00
+4	Newman	Chad	cnewman	750.00
+5	Ropeburn	Audrey	aropebur	1550.00
+
+
+3 Create an INSERT statement to add a new row of data to the hr.MY_EMPLOYEE table from 
+the following sample data. Do not list the columns in the INSERT clause.
+
+INSERT INTO hr.MY_EMPLOYEE (ID,USERID,SALARY)
+VALUES (7,'mscot',900)
+
+
+4. Populate the hr.MY_EMPLOYEE table with a new row: ID=7, USERID=’mscot’ and 
+SALARY=900. Hint: List the columns explicitly in the INSERT clause. List the contents of the 
+hr.MY_EMPLOYEE table to verify the inserts.
+
+
+SELECT *
+FROM hr.MY_EMPLOYEE
+
+INSERT INTO hr.MY_EMPLOYEE 
+VALUES (6,'SMITH','John','jsmith',1200)
+
+5. Copy all the employees from the hr.EMPLOYEES table which have EMPLOYEE_ID between 
+100 and 110 includingly to the hr.MY_EMPLOYEE table. Use the following details to map the 
+columns:
+
+INSERT INTO hr.MY_EMPLOYEE (ID,LAST_NAME)
+SELECT EMPLOYEE_ID,LAST_NAME FROM hr.EMPLOYEES
+WHERE EMPLOYEE_ID BETWEEN 100 and 110
+
+SELECT *
+FROM hr.MY_EMPLOYEE
+
+6. Update the salary to $1,000 for all employees in hr.MY_EMPLOYEE table with a salary less 
+than $900. Verify your changes to the table.
+
+UPDATE hr.MY_EMPLOYEE
+SET SALARY = 1000
+WHERE SALARY < 900;
+
+SELECT *
+FROM hr.MY_EMPLOYEE
+
+7. Update the details of the employee 100 from the hr.EMPLOYEE table to the 
+hr.MY_EMPLOYEE table following the mapping from task 5.
+
+
+UPDATE hr.MY_EMPLOYEE
+SET SALARY = 1000, USERID = 'king', FIRST_NAME = 'Steven'
+WHERE ID = 100
+
+SELECT *
+FROM hr.MY_EMPLOYEE
+
+
+8. Delete Betty Dancs from the hr.MY_EMPLOYEE table. Confirm your changes to the table. 
+
+DELETE hr.MY_EMPLOYEE
+WHERE FIRST_NAME = 'Betty' and LAST_NAME = 'Dancs'
+
+SELECT *
+FROM hr.MY_EMPLOYEE
+
+
+9. Truncate all the contents of the hr.MY_EMPLOYEE tables
+
+TRUNCATE TABLE hr.MY_EMPLOYEE
+
+Command(s) completed successfully.
+
+
+
+--------------------------------------------------------------------------------
+
+LAB 9 – Data Definition Language (DDL)
+
+
+In this LAB you are going to use the XE database.
+1. Create a table named DEPT in the HR schema with the following structure. Note that you should 
+drop the table if it already exists prior to creating it
+
+CREATE TABLE hr.DEPT(
+DEPT_ID INT NOT NULL,
+DEPT_NAME VARCHAR(25) NOT NULL ,
+PRIMARY KEY (DEPT_ID))
+
+Command(s) completed successfully.
+
+SELECT *
+FROM hr.DEPT
+
+2. Populate the hr.DEPT table with data from the hr.DEPARTMENTS table. Include only the columns 
+that you need. Check the contents of the table.
+
+INSERT INTO hr.DEPT(DEPT_ID,DEPT_NAME)
+SELECT DEPARTMENT_ID,DEPARTMENT_NAME FROM hr.DEPARTMENTS
+
+SELECT * FROM hr.DEPT
+DEPT_ID DEPT_NAME
+10		Administration
+20		Marketing
+30		Purchasing
+40		Human Resources
+50		Shipping
+60		IT
+70		Public Relations
+80		Sales
+90		Executive
+
+
+3. Create a table named EMP in the HR schema based on the following table instance chart. Note that 
+you should drop the table if it already exists prior to creating it.
+Perform the above action in two steps:
+1) Create the table structure without the Foreign Key constraint
+2) Add the foreign key constrain
+
+CREATE TABLE hr.EMP(
+EMP_ID INT NOT NULL,
+LAST_NAME VARCHAR(25) NOT NULL ,
+FIRST_NAME VARCHAR(25) NOT NULL)
+
+ALTER TABLE hr.EMP
+ADD FOREIGN KEY (EMP_ID) REFERENCES hr.DEPT(DEPT_ID);
+
+Command(s) completed successfully.
+
+
+4. Try to drop the hr.DEPT table if it exists. You should get the following message:
+
+DROP TABLE hr.DEPT
+
+Msg 3726, Level 16, State 1, Line 2
+Could not drop object 'hr.DEPT' because it is referenced by a FOREIGN KEY constraint.
+
+
+5. Add a new INTEGER column named LOCATION_ID to the hr.DEPT table. Do not allow NULL 
+values to be added to the column. Set the DEFAULT value to 1700.
+
+
+ALTER TABLE hr.DEPT
+ADD LOCATION_ID INT NOT NULL DEFAULT 1700;
+
+
+SELECT *
+FROM hr.DEPT
+
+6. Try to drop the LOCATION_ID column from the hr.DEPT table. The following error message 
+will appear on your screen:
+
+
+ALTER TABLE hr.DEPT
+DROP COLUMN LOCATION_ID;
+
+Msg 5074, Level 16, State 1, Line 2
+The object 'DF__DEPT__LOCATION_I__5F492382' is dependent on column 'LOCATION_ID'.
+Msg 4922, Level 16, State 9, Line 2
+ALTER TABLE DROP COLUMN LOCATION_ID failed because one or more objects access this column.
+
+7.
+
+The reason is that previously you may have created a default constraint which should be dropped 
+prior to dropping the column. So first drop the constraint and then the column itself.
+
+After droping constrains 
+
+ALTER TABLE hr.DEPT
+DROP COLUMN LOCATION_ID
+
+Command(s) completed successfully.
+
+
+8. The staff in the HR department wants to hide some of the data in the hr.EMPLOYEES table. 
+Create a view called V_EMPLOYEES in the HR schema based on EMPLOYEE_ID, LAST_NAME 
+and DEPARTMENT_ID columns from the hr.EMPLOYEES table. The heading for the 
+employee’s last name should be EMPLOYEES.
+
+DROP VIEW hr.V_EMPLOYEES 
+
+
+
+  
+ 
+CREATE VIEW hr.V_EMPLOYEES AS
+SELECT e.EMPLOYEE_ID, e.LAST_NAME AS EMPLOYEES , e.DEPARTMENT_ID
+FROM hr.EMPLOYEES e  LEFT JOIN hr.DEPARTMENTS AS t2
+ON e.DEPARTMENT_ID = t2.DEPARTMENT_ID;
+
+SELECT *
+FROM hr.V_EMPLOYEES  
+
+
+Command(s) completed successfully.
+
+
+9. List all the employes from the hr.V_EMPLOYEES view for which the DEPARTMENT_ID is 90. 
+Display only the EMPLOYEES column
+
+SELECT EMPLOYEES
+FROM hr.V_EMPLOYEES
+WHERE DEPARTMENT_ID = 90
