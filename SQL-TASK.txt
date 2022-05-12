@@ -1,0 +1,68 @@
+SQL- TASK
+
+-	have more than 5 subordinates (table hr.EMPLOYEES) 
+-	the name of the warehouse (WAREHOUSE_NAME from table oe.WAREHOUSES) corresponding to the location of the department (LOCATION_ID from tables oe.WAREHOUSES and hr.DEPARTMENTS), managed by the respective manager (MANAGER_ID from table hr.DEPARTMENTS) contains 'Seat'
+The list should contain the following columns:
+-	MANAGER - Use the columns FIRST_NAME, LAST_NAME, EMAIL from table hr.EMPLOYEES to display the first and last name of the manager and then the e-mail account in lowercase, enclosed in parentheses. For example: Steven King (sking)
+-	TELEPHONE - the first 3 digits of the phone number (PHONE_NUMBER of table hr.EMPLOYEES), enclosed in parentheses and then the remaining characters in the field, replacing the dots with dashes. For example: (515)123-4567
+-	EMPLOYEE_COUNT - The number of subordinates of the respective manager
+-	MANAGER_LEVEL - If the manager's salary (column SALARY in table hr.EMPLOYEES) is less than or equal to 10,000, then this column says 'Lower', if more than 10,000 - says 'Higher'
+
+Sort the result by MANAGER_LEVEL, with employees over 10,000 showing up before the rest. In the groups themselves, the order is by name
+Executive directors must also be added to the list. These are all employees who do not have a manager, and the MANAGER and TELEPHONE columns comply with the same rules as above. The EMPLOYEE_COUNT column contains the number of all employees in the company, and the 'Boss' column is entered in the MANAGER_LEVEL column. Keep sorting from the basic condition by adding CEOs to the top of the list
+
+
+
+
+SELECT 
+    CONCAT(e.FIRST_NAME + ' ',e.LAST_NAME + ' ', '(' + LOWER(e.EMAIL) + ')') AS MANAGER,
+	CONCAT( '(' , SUBSTRING(e.PHONE_NUMBER,1,3) ,')',REPLACE(SUBSTRING(e.PHONE_NUMBER,5,LEN(e.PHONE_NUMBER)),'.','-')) AS TELEPHONE,
+    COUNT (e.EMPLOYEE_ID) AS EMPLOYEE_COUNT,
+	CASE
+	WHEN e.SALARY < 10000 THEN 'Lower'
+	ELSE 'Higher'
+	END AS MANEGER_LEVEL 
+	FROM hr.EMPLOYEES e 
+	JOIN hr.EMPLOYEES manager
+	ON e.EMPLOYEE_ID = manager.MANAGER_ID
+	JOIN hr.DEPARTMENTS D ON e.DEPARTMENT_ID = D.DEPARTMENT_ID
+	WHERE D.LOCATION_ID IN (SELECT W.LOCATION_ID FROM oe.WAREHOUSES W WHERE D.LOCATION_ID = W.LOCATION_ID AND W.WAREHOUSE_NAME LIKE 'Seat%' )
+	GROUP BY e.EMPLOYEE_ID, e.FIRST_NAME, e.LAST_NAME, e.EMAIL,e.PHONE_NUMBER,e.SALARY,e.MANAGER_ID, e.DEPARTMENT_ID
+	HAVING COUNT (e.EMPLOYEE_ID) > 5
+
+UNION
+
+SELECT 
+    CONCAT(e.FIRST_NAME + ' ',e.LAST_NAME + ' ', '(' + LOWER(e.EMAIL) + ')') AS MANAGER,
+	CONCAT( '(' , SUBSTRING(e.PHONE_NUMBER,1,3) ,')',REPLACE(SUBSTRING(e.PHONE_NUMBER,5,LEN(e.PHONE_NUMBER)),'.','-')) AS TELEPHONE,
+	( (SELECT COUNT(EMPLOYEE_ID) FROM hr.EMPLOYEES)) AS EMPLOYEE_COUNT,
+	CASE
+	WHEN e.MANAGER_ID IS NULL THEN 'BOSS'
+	END AS MANEGER_LEVEL
+	FROM hr.EMPLOYEES e  
+	WHERE e.MANAGER_ID IS NULL
+	GROUP BY e.FIRST_NAME , e.LAST_NAME, e.EMAIL, e.PHONE_NUMBER, e.EMPLOYEE_ID, e.MANAGER_ID
+	ORDER BY MANEGER_LEVEL ASC , MANAGER 
+
+
+______________________________________________________________________________________________________________
+WITH Q AS (SELECT 
+    CONCAT(e.FIRST_NAME + ' ',e.LAST_NAME + ' ', '(' + LOWER(e.EMAIL) + ')') AS MANAGER,
+	CONCAT( '(' , SUBSTRING(e.PHONE_NUMBER,1,3) ,')',REPLACE(SUBSTRING(e.PHONE_NUMBER,5,LEN(e.PHONE_NUMBER)),'.','-')) AS TELEPHONE,
+    COUNT (e.EMPLOYEE_ID) AS EMPLOYEE_COUNT,
+	CASE
+	WHEN e.SALARY < 10000 THEN 'Lower'
+	ELSE 'Higher'
+	END AS MANEGER_LEVEL 
+	FROM hr.EMPLOYEES e 
+	JOIN hr.EMPLOYEES manager
+	ON e.EMPLOYEE_ID = manager.MANAGER_ID
+	JOIN hr.DEPARTMENTS D ON e.DEPARTMENT_ID = D.DEPARTMENT_ID
+	WHERE D.LOCATION_ID IN (SELECT W.LOCATION_ID FROM oe.WAREHOUSES W WHERE D.LOCATION_ID = W.LOCATION_ID AND W.WAREHOUSE_NAME LIKE 'Seat%' )
+	GROUP BY e.EMPLOYEE_ID, e.FIRST_NAME, e.LAST_NAME, e.EMAIL,e.PHONE_NUMBER,e.SALARY,e.MANAGER_ID, e.DEPARTMENT_ID)
+	
+
+SELECT * FROM Q
+Where EMPLOYEE_COUNT > 5 
+
+
